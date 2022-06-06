@@ -8,6 +8,7 @@
 
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
 
+#include "brave/browser/brave_rewards/rewards_context_utils.h"
 #include "brave/browser/profiles/brave_profile_manager.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/components/brave_rewards/browser/rewards_notification_service_observer.h"
@@ -48,10 +49,6 @@ RewardsService* RewardsServiceFactory::GetForProfile(
     Profile* profile) {
   if (testing_service_) {
     return testing_service_;
-  }
-
-  if (!brave::IsRegularProfile(profile)) {
-    return nullptr;
   }
 
   return static_cast<RewardsService*>(
@@ -103,6 +100,11 @@ KeyedService* RewardsServiceFactory::BuildServiceInstanceFor(
                         std::move(private_observer),
                         std::move(notification_observer));
   return rewards_service.release();
+}
+
+content::BrowserContext* RewardsServiceFactory::GetBrowserContextToUse(
+    content::BrowserContext* context) const {
+  return IsAllowedForContext(context) ? context : nullptr;
 }
 
 // static

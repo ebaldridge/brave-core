@@ -42,25 +42,6 @@ const updateBadgeTextAllWindows = (windows: chrome.windows.Window[], state?: Rew
   })
 }
 
-const handledByGreaselion = (url: URL) => {
-  if (!url) {
-    return false
-  }
-
-  return url.hostname.endsWith('.github.com') ||
-         url.hostname === 'github.com' ||
-         url.hostname.endsWith('.reddit.com') ||
-         url.hostname === 'reddit.com' ||
-         url.hostname.endsWith('.twitch.tv') ||
-         url.hostname === 'twitch.tv' ||
-         url.hostname.endsWith('.twitter.com') ||
-         url.hostname === 'twitter.com' ||
-         url.hostname.endsWith('.vimeo.com') ||
-         url.hostname === 'vimeo.com' ||
-         url.hostname.endsWith('.youtube.com') ||
-         url.hostname === 'youtube.com'
-}
-
 export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = (state: RewardsExtension.State, action: any) => {
   if (!state) {
     return
@@ -85,15 +66,6 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
       const validKey = publisher && publisher.publisherKey && publisher.publisherKey.length > 0
 
       if (!publisher || (publisher.tabUrl !== tab.url || !validKey)) {
-        // Invalid publisher for tab, re-fetch publisher.
-        if (!handledByGreaselion(new URL(tab.url))) {
-          chrome.braveRewards.getPublisherData(
-            tab.id,
-            tab.url,
-            tab.favIconUrl || '',
-            payload.publisherBlob || '')
-        }
-
         if (publisher) {
           delete publishers[tabKey]
         }

@@ -10,11 +10,13 @@
 #include <utility>
 
 #include "base/memory/raw_ptr.h"
-#include "brave/browser/brave_rewards/rewards_panel_helper.h"
+#include "brave/browser/brave_rewards/rewards_panel_coordinator.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/components/brave_adaptive_captcha/brave_adaptive_captcha_service.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_finder.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
 #include "components/user_prefs/user_prefs.h"
 #include "content/public/browser/storage_partition.h"
@@ -30,7 +32,17 @@ class CaptchaDelegate
 
   bool ShowScheduledCaptcha(const std::string& payment_id,
                             const std::string& captcha_id) override {
-    return brave_rewards::ShowRewardsPanel(context_, true);
+    auto* profile = Profile::FromBrowserContext(context_);
+    auto* browser = chrome::FindTabbedBrowser(profile, false);
+    if (!browser) {
+      return false;
+    }
+    auto* coordinator =
+        brave_rewards::RewardsPanelCoordinator::FromBrowser(browser);
+    if (!coordinator) {
+      return false;
+    }
+    return coordinator->ShowAdaptiveCaptcha();
   }
 
  private:
